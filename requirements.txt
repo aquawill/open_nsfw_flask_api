@@ -5,3 +5,4 @@ tensorflow
 numpy
 scikit-image
 pillow
+opencv-python
