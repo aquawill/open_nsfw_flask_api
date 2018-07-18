@@ -1,0 +1,7 @@
+gunicorn==19.7.1
+flask
+flask-restful
+tensorflow
+numpy
+scikit-image
+pillow
