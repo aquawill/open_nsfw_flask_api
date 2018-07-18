@@ -1,0 +1,22 @@
+{
+  "name": "NSFW AI Classifier",
+  "description": "",
+  "image": "heroku/python",
+  "repository": "https://github.com/heroku/python-getting-started",
+  "keywords": ["python", "caffe", "flask" ],
+  "addons": [ "heroku-postgresql" ],
+  "env": {
+    "SECRET_KEY": {
+      "description": "The secret key for the Django application.",
+      "generator": "secret"
+    }
+  },
+  "environments": {
+    "test": {
+      "scripts": {
+        "test-setup": "python main.py",
+        "test": "python main.py"
+      }
+    }
+  }
+}
