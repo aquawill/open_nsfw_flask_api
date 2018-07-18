@@ -31,13 +31,11 @@ class OpenNsfwModel:
         self.input_tensor = None
 
         if input_type == InputType.TENSOR:
-            tf.reset_default_graph()
             self.input = tf.placeholder(tf.float32,
                                         shape=[None, 224, 224, 3],
                                         name="input")
             self.input_tensor = self.input
         elif input_type == InputType.BASE64_JPEG:
-            tf.reset_default_graph()
             from image_utils import load_base64_tensor
 
             self.input = tf.placeholder(tf.string, shape=(None,), name="input")
