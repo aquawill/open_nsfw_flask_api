@@ -19,7 +19,7 @@ IMAGE_LOADER_YAHOO = "yahoo"
 
 def classifier(img):
     image_loader = 'yahoo'
-    input_file = 'test.jpg'
+    input_file = img
     input_type = 'tensor'
     model_weights = 'data/open_nsfw-weights.npy'
 
