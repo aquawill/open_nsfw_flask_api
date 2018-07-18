@@ -63,7 +63,6 @@ class nsfw_image_api(Resource):
         url = args['url']
         img_arr = dl_img(url)
         im = cv2.imdecode(img_arr, -1)
-        print(io.BytesIO(cv2.imencode('.jpg', im)[1].tostring()))
         file_name = random.randint(0, 9999999999999999)
         cv2.imwrite('{}.jpg'.format(str(file_name)), im)
         result = classifier('{}.jpg'.format(str(file_name)))
