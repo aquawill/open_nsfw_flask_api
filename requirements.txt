@@ -5,4 +5,3 @@ numpy==1.14.5
 opencv_python==3.4.1.15
 Flask_RESTful==0.3.6
 Pillow==5.2.0
-scikit-image
