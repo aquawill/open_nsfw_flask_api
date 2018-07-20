@@ -27,6 +27,8 @@ def classifier(img, url):
     model = OpenNsfwModel()
 
     with tf.Session() as sess:
+        #init = tf.global_variables_initializer()
+        #sess.run(init)
         input_type = InputType[input_type.upper()]
         model.build(weights_path=model_weights, input_type=input_type)
 
