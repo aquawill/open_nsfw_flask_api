@@ -132,30 +132,31 @@ class OpenNsfwModel:
 
     def __conv2d(self, name, inputs, filter_depth, kernel_size, stride=1,
                  padding="same", trainable=False):
+        with tf.variable_scope(name_or_scope='', reuse=tf.AUTO_REUSE):
+            if padding.lower() == 'same' and kernel_size > 1:
+                if kernel_size > 1:
+                    oh = inputs.get_shape().as_list()[1]
+                    h = inputs.get_shape().as_list()[1]
 
-        if padding.lower() == 'same' and kernel_size > 1:
-            if kernel_size > 1:
-                oh = inputs.get_shape().as_list()[1]
-                h = inputs.get_shape().as_list()[1]
+                    p = int(math.floor(((oh - 1) * stride + kernel_size - h)//2))
 
-                p = int(math.floor(((oh - 1) * stride + kernel_size - h)//2))
+                    inputs = tf.pad(inputs,
+                                    [[0, 0], [p, p], [p, p], [0, 0]],
+                                    'CONSTANT')
+                else:
+                    raise Exception('unsupported kernel size for padding: "{}"'
+                                    .format(kernel_size))
+            convolution = tf.layers.conv2d(
+                inputs, filter_depth,
+                kernel_size=(kernel_size, kernel_size),
+                strides=(stride, stride), padding='valid',
+                activation=None, trainable=trainable, name=name,
+                kernel_initializer=tf.constant_initializer(
+                    self.__get_weights(name, "weights"), dtype=tf.float32),
+                bias_initializer=tf.constant_initializer(
+                    self.__get_weights(name, "biases"), dtype=tf.float32), reuse=False)
 
-                inputs = tf.pad(inputs,
-                                [[0, 0], [p, p], [p, p], [0, 0]],
-                                'CONSTANT')
-            else:
-                raise Exception('unsupported kernel size for padding: "{}"'
-                                .format(kernel_size))
-
-        return tf.layers.conv2d(
-            inputs, filter_depth,
-            kernel_size=(kernel_size, kernel_size),
-            strides=(stride, stride), padding='valid',
-            activation=None, trainable=trainable, name=name,
-            kernel_initializer=tf.constant_initializer(
-                self.__get_weights(name, "weights"), dtype=tf.float32),
-            bias_initializer=tf.constant_initializer(
-                self.__get_weights(name, "biases"), dtype=tf.float32), reuse=False)
+        return convolution
 
     def __batch_norm(self, name, inputs, training=False):
         return tf.layers.batch_normalization(
