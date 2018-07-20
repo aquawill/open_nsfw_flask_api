@@ -123,12 +123,13 @@ class OpenNsfwModel:
     """Layer creation and weight initialization
     """
     def __fully_connected(self, name, inputs, num_outputs):
-        return tf.layers.dense(
-            inputs=inputs, units=num_outputs, name=name,
-            kernel_initializer=tf.constant_initializer(
-                self.__get_weights(name, "weights"), dtype=tf.float32),
-            bias_initializer=tf.constant_initializer(
-                self.__get_weights(name, "biases"), dtype=tf.float32))
+        with tf.variable_scope(name_or_scope='', reuse=tf.AUTO_REUSE):
+            return tf.layers.dense(
+                inputs=inputs, units=num_outputs, name=name,
+                kernel_initializer=tf.constant_initializer(
+                    self.__get_weights(name, "weights"), dtype=tf.float32),
+                bias_initializer=tf.constant_initializer(
+                    self.__get_weights(name, "biases"), dtype=tf.float32))
 
     def __conv2d(self, name, inputs, filter_depth, kernel_size, stride=1,
                  padding="same", trainable=False):

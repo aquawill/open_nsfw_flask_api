@@ -2,7 +2,7 @@
 import os
 import random
 from urllib.request import Request, urlopen
-
+import ast
 import cv2
 import numpy as np
 import tensorflow as tf
@@ -60,20 +60,42 @@ def dl_img(img_url):
     arr = np.asarray(bytearray(img.read()), dtype=np.uint8)
     return arr
 
+def url_processor(url):
+    img_arr = dl_img(url)
+    im = cv2.imdecode(img_arr, -1)
+    file_name = random.randint(0, 9999999999999999)
+    cv2.imwrite('{}.jpg'.format(str(file_name)), im)
+    result = classifier('{}.jpg'.format(str(file_name)), url)
+    os.remove('{}.jpg'.format(str(file_name)))
+    return result
+
 
 class nsfw_image_api(Resource):
     def post(self):
+        results = []
         args = parser.parse_args()
         print(args)
-        url = args.get('url')
-        urls = args.get('urls')
-        img_arr = dl_img(url)
-        im = cv2.imdecode(img_arr, -1)
-        file_name = random.randint(0, 9999999999999999)
-        cv2.imwrite('{}.jpg'.format(str(file_name)), im)
-        result = classifier('{}.jpg'.format(str(file_name)), url)
-        os.remove('{}.jpg'.format(str(file_name)))
-        return result
+        if args.get('urls'):
+            urls = ast.literal_eval(args.get('urls'))
+            for url in urls:
+                img_arr = dl_img(url)
+                im = cv2.imdecode(img_arr, -1)
+                file_name = random.randint(0, 9999999999999999)
+                cv2.imwrite('{}.jpg'.format(str(file_name)), im)
+                result = classifier('{}.jpg'.format(str(file_name)), url)
+                os.remove('{}.jpg'.format(str(file_name)))
+                results.append(result)
+        elif args.get('url'):
+            url = args.get('url')
+            #url_processor(url)
+            img_arr = dl_img(url)
+            im = cv2.imdecode(img_arr, -1)
+            file_name = random.randint(0, 9999999999999999)
+            cv2.imwrite('{}.jpg'.format(str(file_name)), im)
+            result = classifier('{}.jpg'.format(str(file_name)), url)
+            os.remove('{}.jpg'.format(str(file_name)))
+            results.append(result)
+        return results
 
 
 app = Flask(__name__)
@@ -81,6 +103,7 @@ api = Api(app)
 api.add_resource(nsfw_image_api, '/', endpoint='url')
 parser = reqparse.RequestParser()
 parser.add_argument('url')
+parser.add_argument('urls')
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
