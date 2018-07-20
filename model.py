@@ -155,7 +155,7 @@ class OpenNsfwModel:
             kernel_initializer=tf.constant_initializer(
                 self.__get_weights(name, "weights"), dtype=tf.float32),
             bias_initializer=tf.constant_initializer(
-                self.__get_weights(name, "biases"), dtype=tf.float32))
+                self.__get_weights(name, "biases"), dtype=tf.float32), reuse=False)
 
     def __batch_norm(self, name, inputs, training=False):
         return tf.layers.batch_normalization(
