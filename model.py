@@ -154,100 +154,103 @@ class OpenNsfwModel:
                 kernel_initializer=tf.constant_initializer(
                     self.__get_weights(name, "weights"), dtype=tf.float32),
                 bias_initializer=tf.constant_initializer(
-                    self.__get_weights(name, "biases"), dtype=tf.float32), reuse=False)
+                    self.__get_weights(name, "biases"), dtype=tf.float32))
 
         return convolution
 
     def __batch_norm(self, name, inputs, training=False):
-        return tf.layers.batch_normalization(
-            inputs, training=training, epsilon=self.bn_epsilon,
-            gamma_initializer=tf.constant_initializer(
-                self.__get_weights(name, "scale"), dtype=tf.float32),
-            beta_initializer=tf.constant_initializer(
-                self.__get_weights(name, "offset"), dtype=tf.float32),
-            moving_mean_initializer=tf.constant_initializer(
-                self.__get_weights(name, "mean"), dtype=tf.float32),
-            moving_variance_initializer=tf.constant_initializer(
-                self.__get_weights(name, "variance"), dtype=tf.float32),
-            name=name)
+        with tf.variable_scope(name_or_scope='', reuse=tf.AUTO_REUSE):
+            return tf.layers.batch_normalization(
+                inputs, training=training, epsilon=self.bn_epsilon,
+                gamma_initializer=tf.constant_initializer(
+                    self.__get_weights(name, "scale"), dtype=tf.float32),
+                beta_initializer=tf.constant_initializer(
+                    self.__get_weights(name, "offset"), dtype=tf.float32),
+                moving_mean_initializer=tf.constant_initializer(
+                    self.__get_weights(name, "mean"), dtype=tf.float32),
+                moving_variance_initializer=tf.constant_initializer(
+                    self.__get_weights(name, "variance"), dtype=tf.float32),
+                name=name)
 
     """ResNet blocks
     """
     def __conv_block(self, stage, block, inputs, filter_depths,
                      kernel_size=3, stride=2):
-        filter_depth1, filter_depth2, filter_depth3 = filter_depths
+        with tf.variable_scope(name_or_scope='', reuse=tf.AUTO_REUSE):
+            filter_depth1, filter_depth2, filter_depth3 = filter_depths
 
-        conv_name_base = "conv_stage{}_block{}_branch".format(stage, block)
-        bn_name_base = "bn_stage{}_block{}_branch".format(stage, block)
-        shortcut_name_post = "_stage{}_block{}_proj_shortcut" \
-                             .format(stage, block)
+            conv_name_base = "conv_stage{}_block{}_branch".format(stage, block)
+            bn_name_base = "bn_stage{}_block{}_branch".format(stage, block)
+            shortcut_name_post = "_stage{}_block{}_proj_shortcut" \
+                                 .format(stage, block)
 
-        shortcut = self.__conv2d(
-            name="conv{}".format(shortcut_name_post), stride=stride,
-            inputs=inputs, filter_depth=filter_depth3, kernel_size=1,
-            padding="same"
-        )
+            shortcut = self.__conv2d(
+                name="conv{}".format(shortcut_name_post), stride=stride,
+                inputs=inputs, filter_depth=filter_depth3, kernel_size=1,
+                padding="same"
+            )
 
-        shortcut = self.__batch_norm("bn{}".format(shortcut_name_post),
-                                     shortcut)
+            shortcut = self.__batch_norm("bn{}".format(shortcut_name_post),
+                                         shortcut)
 
-        x = self.__conv2d(
-            name="{}2a".format(conv_name_base),
-            inputs=inputs, filter_depth=filter_depth1, kernel_size=1,
-            stride=stride, padding="same",
-        )
-        x = self.__batch_norm("{}2a".format(bn_name_base), x)
-        x = tf.nn.relu(x)
+            x = self.__conv2d(
+                name="{}2a".format(conv_name_base),
+                inputs=inputs, filter_depth=filter_depth1, kernel_size=1,
+                stride=stride, padding="same",
+            )
+            x = self.__batch_norm("{}2a".format(bn_name_base), x)
+            x = tf.nn.relu(x)
 
-        x = self.__conv2d(
-            name="{}2b".format(conv_name_base),
-            inputs=x, filter_depth=filter_depth2, kernel_size=kernel_size,
-            padding="same", stride=1
-        )
-        x = self.__batch_norm("{}2b".format(bn_name_base), x)
-        x = tf.nn.relu(x)
+            x = self.__conv2d(
+                name="{}2b".format(conv_name_base),
+                inputs=x, filter_depth=filter_depth2, kernel_size=kernel_size,
+                padding="same", stride=1
+            )
+            x = self.__batch_norm("{}2b".format(bn_name_base), x)
+            x = tf.nn.relu(x)
 
-        x = self.__conv2d(
-            name="{}2c".format(conv_name_base),
-            inputs=x, filter_depth=filter_depth3, kernel_size=1,
-            padding="same", stride=1
-        )
-        x = self.__batch_norm("{}2c".format(bn_name_base), x)
+            x = self.__conv2d(
+                name="{}2c".format(conv_name_base),
+                inputs=x, filter_depth=filter_depth3, kernel_size=1,
+                padding="same", stride=1
+            )
+            x = self.__batch_norm("{}2c".format(bn_name_base), x)
 
-        x = tf.add(x, shortcut)
+            x = tf.add(x, shortcut)
 
         return tf.nn.relu(x)
 
     def __identity_block(self, stage, block, inputs,
                          filter_depths, kernel_size):
-        filter_depth1, filter_depth2, filter_depth3 = filter_depths
-        conv_name_base = "conv_stage{}_block{}_branch".format(stage, block)
-        bn_name_base = "bn_stage{}_block{}_branch".format(stage, block)
+        with tf.variable_scope(name_or_scope='', reuse=tf.AUTO_REUSE):
+            filter_depth1, filter_depth2, filter_depth3 = filter_depths
+            conv_name_base = "conv_stage{}_block{}_branch".format(stage, block)
+            bn_name_base = "bn_stage{}_block{}_branch".format(stage, block)
 
-        x = self.__conv2d(
-            name="{}2a".format(conv_name_base),
-            inputs=inputs, filter_depth=filter_depth1, kernel_size=1,
-            stride=1, padding="same",
-        )
+            x = self.__conv2d(
+                name="{}2a".format(conv_name_base),
+                inputs=inputs, filter_depth=filter_depth1, kernel_size=1,
+                stride=1, padding="same",
+            )
 
-        x = self.__batch_norm("{}2a".format(bn_name_base), x)
-        x = tf.nn.relu(x)
+            x = self.__batch_norm("{}2a".format(bn_name_base), x)
+            x = tf.nn.relu(x)
 
-        x = self.__conv2d(
-            name="{}2b".format(conv_name_base),
-            inputs=x, filter_depth=filter_depth2, kernel_size=kernel_size,
-            padding="same", stride=1
-        )
-        x = self.__batch_norm("{}2b".format(bn_name_base), x)
-        x = tf.nn.relu(x)
+            x = self.__conv2d(
+                name="{}2b".format(conv_name_base),
+                inputs=x, filter_depth=filter_depth2, kernel_size=kernel_size,
+                padding="same", stride=1
+            )
+            x = self.__batch_norm("{}2b".format(bn_name_base), x)
+            x = tf.nn.relu(x)
 
-        x = self.__conv2d(
-            name="{}2c".format(conv_name_base),
-            inputs=x, filter_depth=filter_depth3, kernel_size=1,
-            padding="same", stride=1
-        )
-        x = self.__batch_norm("{}2c".format(bn_name_base), x)
+            x = self.__conv2d(
+                name="{}2c".format(conv_name_base),
+                inputs=x, filter_depth=filter_depth3, kernel_size=1,
+                padding="same", stride=1
+            )
+            x = self.__batch_norm("{}2c".format(bn_name_base), x)
 
-        x = tf.add(x, inputs)
+            x = tf.add(x, inputs)
 
         return tf.nn.relu(x)
