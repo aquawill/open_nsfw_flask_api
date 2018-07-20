@@ -1,3 +1,4 @@
+gunicorn
 scikit_image==0.14.0
 Flask==1.0.2
 tensorflow==1.8.0
