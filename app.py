@@ -27,8 +27,6 @@ def classifier(img, url):
     model = OpenNsfwModel()
 
     with tf.Session() as sess:
-        #init = tf.global_variables_initializer()
-        #sess.run(init)
         input_type = InputType[input_type.upper()]
         model.build(weights_path=model_weights, input_type=input_type)
 
@@ -47,6 +45,7 @@ def classifier(img, url):
         sess.run(tf.global_variables_initializer())
         image = fn_load_image(input_file)
         predictions = sess.run(model.predictions, feed_dict={model.input: image})
+        sess.close()
     return {'url': url, 'sfw': str(predictions[0][0]), 'nsfw': str(predictions[0][1])}
 
 
