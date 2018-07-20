@@ -106,5 +106,5 @@ parser.add_argument('url')
 parser.add_argument('urls')
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5001)
+    app.run(port=5001)
     # #http://n.sinaimg.cn/finance/transform/20161206/BDjF-fxyiayr9304919.jpg
