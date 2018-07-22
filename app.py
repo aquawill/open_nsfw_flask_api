@@ -1,14 +1,16 @@
 #!/usr/bin/env python
+import ast
 import os
 import random
+import ssl
 from urllib.request import Request, urlopen
-import ast
+
 import cv2
 import numpy as np
 import tensorflow as tf
 from flask import Flask
 from flask_restful import reqparse, Api, Resource
-import ssl
+from tensorflow.python.ops import variable_scope as vs
 
 from image_utils import create_tensorflow_image_loader
 from image_utils import create_yahoo_image_loader
@@ -18,7 +20,10 @@ IMAGE_LOADER_TENSORFLOW = "tensorflow"
 IMAGE_LOADER_YAHOO = "yahoo"
 context = ssl._create_unverified_context()
 
-def classifier(img, url):
+
+def classifier(img, url, reuse=False):
+    if reuse:
+        vs.get_variable_scope().reuse_variables()
     image_loader = 'yahoo'
     input_file = img
     input_type = 'tensor'
@@ -77,12 +82,13 @@ class nsfw_image_api(Resource):
         print(args)
         if args.get('urls'):
             urls = ast.literal_eval(args.get('urls'))
-            for url in urls:
+            for _ in range(len(urls)):
+                url = urls[_]
                 img_arr = dl_img(url)
                 im = cv2.imdecode(img_arr, -1)
                 file_name = random.randint(0, 9999999999999999)
                 cv2.imwrite('{}.jpg'.format(str(file_name)), im)
-                result = classifier('{}.jpg'.format(str(file_name)), url)
+                result = classifier('{}.jpg'.format(str(file_name)), url, reuse=(_ != 0))
                 os.remove('{}.jpg'.format(str(file_name)))
                 results.append(result)
         elif args.get('url'):

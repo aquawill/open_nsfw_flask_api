@@ -1,7 +1,8 @@
 import math
+from enum import Enum, unique
+
 import numpy as np
 import tensorflow as tf
-from enum import Enum, unique
 
 
 @unique
@@ -123,55 +124,55 @@ class OpenNsfwModel:
     """Layer creation and weight initialization
     """
     def __fully_connected(self, name, inputs, num_outputs):
-        with tf.variable_scope(name_or_scope='', reuse=tf.AUTO_REUSE):
-            return tf.layers.dense(
-                inputs=inputs, units=num_outputs, name=name,
-                kernel_initializer=tf.constant_initializer(
-                    self.__get_weights(name, "weights"), dtype=tf.float32),
-                bias_initializer=tf.constant_initializer(
-                    self.__get_weights(name, "biases"), dtype=tf.float32))
+        # with tf.variable_scope(name_or_scope='', reuse=tf.AUTO_REUSE):
+        return tf.layers.dense(
+            inputs=inputs, units=num_outputs, name=name,
+            kernel_initializer=tf.constant_initializer(
+                self.__get_weights(name, "weights"), dtype=tf.float32),
+            bias_initializer=tf.constant_initializer(
+                self.__get_weights(name, "biases"), dtype=tf.float32))
 
     def __conv2d(self, name, inputs, filter_depth, kernel_size, stride=1,
                  padding="same", trainable=False):
-        with tf.variable_scope(name_or_scope='', reuse=tf.AUTO_REUSE):
-            if padding.lower() == 'same' and kernel_size > 1:
-                if kernel_size > 1:
-                    oh = inputs.get_shape().as_list()[1]
-                    h = inputs.get_shape().as_list()[1]
+        # with tf.variable_scope(name_or_scope='', reuse=tf.AUTO_REUSE):
+        if padding.lower() == 'same' and kernel_size > 1:
+            if kernel_size > 1:
+                oh = inputs.get_shape().as_list()[1]
+                h = inputs.get_shape().as_list()[1]
 
-                    p = int(math.floor(((oh - 1) * stride + kernel_size - h)//2))
+                p = int(math.floor(((oh - 1) * stride + kernel_size - h) // 2))
 
-                    inputs = tf.pad(inputs,
-                                    [[0, 0], [p, p], [p, p], [0, 0]],
-                                    'CONSTANT')
-                else:
-                    raise Exception('unsupported kernel size for padding: "{}"'
-                                    .format(kernel_size))
-            convolution = tf.layers.conv2d(
-                inputs, filter_depth,
-                kernel_size=(kernel_size, kernel_size),
-                strides=(stride, stride), padding='valid',
-                activation=None, trainable=trainable, name=name,
-                kernel_initializer=tf.constant_initializer(
-                    self.__get_weights(name, "weights"), dtype=tf.float32),
-                bias_initializer=tf.constant_initializer(
-                    self.__get_weights(name, "biases"), dtype=tf.float32))
+                inputs = tf.pad(inputs,
+                                [[0, 0], [p, p], [p, p], [0, 0]],
+                                'CONSTANT')
+            else:
+                raise Exception('unsupported kernel size for padding: "{}"'
+                                .format(kernel_size))
+        convolution = tf.layers.conv2d(
+            inputs, filter_depth,
+            kernel_size=(kernel_size, kernel_size),
+            strides=(stride, stride), padding='valid',
+            activation=None, trainable=trainable, name=name,
+            kernel_initializer=tf.constant_initializer(
+                self.__get_weights(name, "weights"), dtype=tf.float32),
+            bias_initializer=tf.constant_initializer(
+                self.__get_weights(name, "biases"), dtype=tf.float32))
 
         return convolution
 
     def __batch_norm(self, name, inputs, training=False):
-        with tf.variable_scope(name_or_scope='', reuse=tf.AUTO_REUSE):
-            return tf.layers.batch_normalization(
-                inputs, training=training, epsilon=self.bn_epsilon,
-                gamma_initializer=tf.constant_initializer(
-                    self.__get_weights(name, "scale"), dtype=tf.float32),
-                beta_initializer=tf.constant_initializer(
-                    self.__get_weights(name, "offset"), dtype=tf.float32),
-                moving_mean_initializer=tf.constant_initializer(
-                    self.__get_weights(name, "mean"), dtype=tf.float32),
-                moving_variance_initializer=tf.constant_initializer(
-                    self.__get_weights(name, "variance"), dtype=tf.float32),
-                name=name)
+        # with tf.variable_scope(name_or_scope='', reuse=tf.AUTO_REUSE):
+        return tf.layers.batch_normalization(
+            inputs, training=training, epsilon=self.bn_epsilon,
+            gamma_initializer=tf.constant_initializer(
+                self.__get_weights(name, "scale"), dtype=tf.float32),
+            beta_initializer=tf.constant_initializer(
+                self.__get_weights(name, "offset"), dtype=tf.float32),
+            moving_mean_initializer=tf.constant_initializer(
+                self.__get_weights(name, "mean"), dtype=tf.float32),
+            moving_variance_initializer=tf.constant_initializer(
+                self.__get_weights(name, "variance"), dtype=tf.float32),
+            name=name)
 
     """ResNet blocks
     """
